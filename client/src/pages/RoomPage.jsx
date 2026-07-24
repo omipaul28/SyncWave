@@ -6,7 +6,7 @@ import useRoomStore from '../store/roomStore';
 import useRoom from '../hooks/useRoom';
 import useAuthStore from '../store/authStore';
 import usePlayerStore from '../store/playerStore';
-import { audio } from '../hooks/useAudio'; // shared singleton — no double audio
+import { audio } from '../lib/audio'; // shared singleton — no double audio
 import ProgressBar from '../components/player/ProgressBar';
 import VolumeControl from '../components/player/VolumeControl';
 import { fetchSongs } from '../api/songsApi';

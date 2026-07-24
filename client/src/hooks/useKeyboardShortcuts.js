@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import usePlayerStore from '../store/playerStore';
-import { audio } from './useAudio';
+import { audio } from '../lib/audio';
 
 /**
  * Registers global keyboard shortcuts for the music player.
