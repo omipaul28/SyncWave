@@ -1,4 +1,6 @@
 import { Outlet } from 'react-router-dom';
+import { Play } from 'lucide-react';
+import { audio } from '../../lib/audio';
 import Sidebar from './Sidebar';
 import Topbar from './Topbar';
 import BottomNav from './BottomNav';
@@ -21,7 +23,7 @@ function AudioManager() {
 }
 
 export default function MainLayout() {
-  const { currentSong, isFullPlayer } = usePlayerStore();
+  const { currentSong, isFullPlayer, isAudioBlocked } = usePlayerStore();
   const { isInRoom } = useRoomStore();
 
   return (
@@ -65,6 +67,31 @@ export default function MainLayout() {
 
       {/* Full screen player overlay — hidden in rooms */}
       {isFullPlayer && !isInRoom && <FullPlayer />}
+
+      {/* Audio unblock overlay for iOS Safari */}
+      {isAudioBlocked && (
+        <div className="fixed inset-0 z-[100] bg-black/80 flex flex-col items-center justify-center p-6 backdrop-blur-sm animate-fade-in">
+          <div className="glass p-8 rounded-3xl flex flex-col items-center max-w-xs text-center border border-surface-border">
+            <div className="w-20 h-20 rounded-full bg-accent/20 flex items-center justify-center mb-6 shadow-lg shadow-accent/10 animate-pulse-slow">
+              <Play className="w-10 h-10 text-accent ml-1" />
+            </div>
+            <h2 className="text-xl font-display font-bold text-white mb-3">Tap to Play</h2>
+            <p className="text-sm text-text-muted mb-8 leading-relaxed">
+              Your browser requires you to tap the screen before music can play in the background.
+            </p>
+            <button 
+              className="btn-primary w-full py-4 text-base font-bold shadow-lg shadow-accent/20 transition-transform active:scale-95"
+              onClick={() => {
+                audio.play().then(() => {
+                  usePlayerStore.getState().setAudioBlocked(false);
+                }).catch(() => {});
+              }}
+            >
+              Start Listening
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

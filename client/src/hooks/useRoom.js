@@ -1,6 +1,7 @@
 import { useEffect, useRef, useCallback } from 'react';
 import { getSocket } from '../lib/socket';
 import useRoomStore from '../store/roomStore';
+import usePlayerStore from '../store/playerStore';
 import useSocket from './useSocket';
 
 const DRIFT_THRESHOLD_SEC = 0.5;   // seek-correct if drift > 500ms
@@ -51,7 +52,13 @@ const useRoom = (rawRoomId, audio) => {
         if (audio && delta.currentTime !== undefined && !delta.isPlaying) {
           audio.currentTime = delta.currentTime;
         }
-        if (delta.isPlaying === true) audio?.play().catch(() => {});
+        if (delta.isPlaying === true) {
+          audio?.play().then(() => {
+            if (usePlayerStore.getState().isAudioBlocked) usePlayerStore.getState().setAudioBlocked(false);
+          }).catch((e) => {
+            if (e.name === 'NotAllowedError') usePlayerStore.getState().setAudioBlocked(true);
+          });
+        }
         if (delta.isPlaying === false) audio?.pause();
       },
       'member-joined': ({ uid, username, avatar }) => {

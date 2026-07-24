@@ -2,13 +2,18 @@ import { create } from 'zustand';
 import { audio } from '../lib/audio';
 
 const syncAudio = (song, play) => {
+  const state = usePlayerStore.getState();
   if (song && song.audioUrl) {
     if (!audio.src || !audio.src.includes(song.audioUrl)) {
       audio.src = song.audioUrl;
       audio.load();
     }
     if (play) {
-      audio.play().catch(() => {});
+      audio.play().then(() => {
+        if (state.isAudioBlocked) state.setAudioBlocked(false);
+      }).catch((e) => {
+        if (e.name === 'NotAllowedError') state.setAudioBlocked(true);
+      });
     } else {
       audio.pause();
     }
@@ -38,8 +43,10 @@ const usePlayerStore = create((set, get) => ({
   isFullPlayer: false,
   isQueueOpen: false,
   isLyricsOpen: false,
+  isAudioBlocked: false,
 
   // ── Actions ──────────────────────────────────────────────────────────────────
+  setAudioBlocked: (blocked) => set({ isAudioBlocked: blocked }),
   setCurrentSong: (song) => {
     syncAudio(song, true);
     set({ currentSong: song, currentTime: 0, isPlaying: true });
