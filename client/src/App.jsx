@@ -5,7 +5,7 @@ import { auth } from './lib/firebase';
 import { connectSocket, disconnectSocket } from './lib/socket';
 import { verifyUser } from './api/usersApi';
 import useAuthStore from './store/authStore';
-import { audio } from './hooks/useAudio';
+import { audio } from './lib/audio';
 
 // Layouts
 import MainLayout from './components/layout/MainLayout';

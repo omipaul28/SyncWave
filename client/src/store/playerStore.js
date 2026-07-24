@@ -1,5 +1,22 @@
 import { create } from 'zustand';
+import { audio } from '../lib/audio';
 
+const syncAudio = (song, play) => {
+  if (song && song.audioUrl) {
+    if (!audio.src || !audio.src.includes(song.audioUrl)) {
+      audio.src = song.audioUrl;
+      audio.load();
+    }
+    if (play) {
+      audio.play().catch(() => {});
+    } else {
+      audio.pause();
+    }
+  } else if (!song && !play) {
+    audio.pause();
+    audio.src = '';
+  }
+};
 const usePlayerStore = create((set, get) => ({
   // Current track
   currentSong: null,
@@ -23,8 +40,15 @@ const usePlayerStore = create((set, get) => ({
   isLyricsOpen: false,
 
   // ── Actions ──────────────────────────────────────────────────────────────────
-  setCurrentSong: (song) => set({ currentSong: song, currentTime: 0, isPlaying: true }),
-  setIsPlaying: (isPlaying) => set({ isPlaying }),
+  setCurrentSong: (song) => {
+    syncAudio(song, true);
+    set({ currentSong: song, currentTime: 0, isPlaying: true });
+  },
+  setIsPlaying: (isPlaying) => {
+    const { currentSong } = get();
+    if (currentSong) syncAudio(currentSong, isPlaying);
+    set({ isPlaying });
+  },
   setCurrentTime: (currentTime) => set({ currentTime }),
   setDuration: (duration) => set({ duration }),
   setVolume: (volume) => set({ volume, isMuted: volume === 0 }),
@@ -32,7 +56,10 @@ const usePlayerStore = create((set, get) => ({
   seek: () => {},
   registerSeek: (fn) => set({ seek: fn }),
   // Stop all playback and clear the current song (close button)
-  stopPlayback: () => set({ currentSong: null, isPlaying: false, currentTime: 0, duration: 0, queue: [], history: [], isFullPlayer: false }),
+  stopPlayback: () => {
+    syncAudio(null, false);
+    set({ currentSong: null, isPlaying: false, currentTime: 0, duration: 0, queue: [], history: [], isFullPlayer: false });
+  },
   toggleMute: () => {
     const { isMuted, volume } = get();
     set({ isMuted: !isMuted, volume: isMuted ? (volume || 0.5) : volume });
@@ -60,6 +87,8 @@ const usePlayerStore = create((set, get) => ({
     }
 
     if (repeat === 'one' && currentSong) {
+      syncAudio(currentSong, true);
+      audio.currentTime = 0;
       set({ currentTime: 0, isPlaying: true });
       return;
     }
@@ -67,8 +96,10 @@ const usePlayerStore = create((set, get) => ({
     if (queue.length === 0) {
       if (repeat === 'all' && history.length > 0) {
         const fullHistory = [...history, currentSong].filter(Boolean);
+        syncAudio(fullHistory[0], true);
         set({ queue: fullHistory.slice(1), currentSong: fullHistory[0], history: [], currentTime: 0 });
       } else {
+        syncAudio(currentSong, false);
         set({ isPlaying: false, currentTime: 0 });
       }
       return;
@@ -79,6 +110,7 @@ const usePlayerStore = create((set, get) => ({
     if (shuffle) nextIndex = Math.floor(Math.random() * queue.length);
 
     const [nextSong] = newQueue.splice(nextIndex, 1);
+    syncAudio(nextSong, true);
     set({ currentSong: nextSong, queue: newQueue, currentTime: 0, isPlaying: true });
   },
 
@@ -86,6 +118,7 @@ const usePlayerStore = create((set, get) => ({
     const { history, currentSong, queue, currentTime } = get();
 
     if (currentTime > 3) {
+      audio.currentTime = 0;
       set({ currentTime: 0 });
       return;
     }
@@ -97,6 +130,7 @@ const usePlayerStore = create((set, get) => ({
 
     const prev = [...history];
     const prevSong = prev.pop();
+    syncAudio(prevSong, true);
     set({
       currentSong: prevSong,
       history: prev,
@@ -112,6 +146,7 @@ const usePlayerStore = create((set, get) => ({
     const song = queue[index];
     const newQueue = queue.filter((_, i) => i !== index);
     const newHistory = currentSong ? [...history, currentSong] : history;
+    syncAudio(song, true);
     set({ currentSong: song, queue: newQueue, history: newHistory, currentTime: 0, isPlaying: true });
   },
 }));

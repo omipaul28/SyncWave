@@ -1,15 +1,7 @@
 import { useEffect, useCallback } from 'react';
 import usePlayerStore from '../store/playerStore';
 import { recordPlay } from '../api/songsApi';
-
-/**
- * Module-level singleton Audio element.
- * Shared across ALL components that call useAudio() so only one
- * audio source ever plays at a time (fixes double-audio when
- * MiniPlayer and FullPlayer are both mounted).
- */
-export const audio = new Audio();
-audio.preload = 'metadata';
+import { audio } from '../lib/audio';
 
 let preloadAudio = null;
 
@@ -31,12 +23,9 @@ const useAudio = () => {
     queue,
   } = usePlayerStore();
 
-  // ── Load new song ──────────────────────────────────────────────────────────
+  // ── Load new song side-effects ─────────────────────────────────────────────
   useEffect(() => {
     if (!currentSong?.audioUrl) return;
-    audio.src = currentSong.audioUrl;
-    audio.load();
-    if (isPlaying) audio.play().catch(console.error);
 
     // Record play in background
     recordPlay(currentSong.id).catch(() => {});
@@ -50,18 +39,10 @@ const useAudio = () => {
 
   // ── Stop when currentSong is cleared (close button) ──────────────────────
   useEffect(() => {
-    if (!currentSong) {
-      audio.pause();
-      audio.src = '';
-    }
+    // Handled synchronously by store, but we can keep side effects here if needed
   }, [currentSong]);
 
-  // ── Play / Pause ───────────────────────────────────────────────────────────
-  useEffect(() => {
-    if (!currentSong) return;
-    if (isPlaying) audio.play().catch(console.error);
-    else audio.pause();
-  }, [isPlaying]);
+
 
   // ── Volume / Mute ──────────────────────────────────────────────────────────
   useEffect(() => {
