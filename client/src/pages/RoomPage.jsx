@@ -268,7 +268,11 @@ export default function RoomPage() {
   }, [emitNext]);
 
   const handleSeek = (t) => { audio.currentTime = t; emitSeek(t); };
-  const handlePlayPause = () => room.isPlaying ? emitPause() : emitPlay();
+  const handlePlayPause = () => {
+    // Synchronous unlock of the audio element on iOS during user gesture
+    if (!room.isPlaying) audio.play().catch(() => {});
+    room.isPlaying ? emitPause() : emitPlay();
+  };
 
   const handleLeave = () => {
     audio.pause();
@@ -288,6 +292,8 @@ export default function RoomPage() {
   const handleAddToQueue = (song) => emitQueueAdd(song);
 
   const handlePlayNow = (song) => {
+    // Synchronous unlock of the audio element on iOS during user gesture
+    if (!room.isPlaying) audio.play().catch(() => {});
     emitSongChange(song);
     setActiveTab('queue');
   };

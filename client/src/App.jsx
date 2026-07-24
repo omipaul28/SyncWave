@@ -57,9 +57,14 @@ export default function App() {
     const unlockAudio = () => {
       // Play silent audio to unlock context on mobile
       if (audio.paused) {
-        audio.play().then(() => {
+        const onPlaying = () => {
           audio.pause();
-        }).catch(() => {});
+          audio.removeEventListener('playing', onPlaying);
+        };
+        audio.addEventListener('playing', onPlaying);
+        audio.play().catch(() => {
+          audio.removeEventListener('playing', onPlaying);
+        });
       }
       document.removeEventListener('click', unlockAudio);
       document.removeEventListener('touchstart', unlockAudio);
