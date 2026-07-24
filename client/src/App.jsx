@@ -56,7 +56,12 @@ export default function App() {
     // Unlock HTMLAudioElement for iOS Safari on first interaction
     const unlockAudio = () => {
       if (audio.paused && !audio.src) {
-        audio.play().catch(() => {});
+        // Play a tiny silent base64 WAV to unlock the audio context in iOS Safari
+        audio.src = 'data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAIhYAQACABAAAABkYXRhAgAAAAEA';
+        audio.play().then(() => {
+          audio.pause();
+          audio.src = '';
+        }).catch(() => {});
       }
       document.removeEventListener('click', unlockAudio);
       document.removeEventListener('touchstart', unlockAudio);
