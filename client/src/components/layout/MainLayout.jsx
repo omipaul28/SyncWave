@@ -23,7 +23,7 @@ function AudioManager() {
 }
 
 export default function MainLayout() {
-  const { currentSong, isFullPlayer, isAudioBlocked } = usePlayerStore();
+  const { currentSong, isFullPlayer, audioError } = usePlayerStore();
   const { isInRoom } = useRoomStore();
 
   return (
@@ -69,22 +69,27 @@ export default function MainLayout() {
       {isFullPlayer && !isInRoom && <FullPlayer />}
 
       {/* Audio unblock overlay for iOS Safari */}
-      {isAudioBlocked && (
+      {audioError && (
         <div className="fixed inset-0 z-[100] bg-black/80 flex flex-col items-center justify-center p-6 backdrop-blur-sm animate-fade-in">
           <div className="glass p-8 rounded-3xl flex flex-col items-center max-w-xs text-center border border-surface-border">
             <div className="w-20 h-20 rounded-full bg-accent/20 flex items-center justify-center mb-6 shadow-lg shadow-accent/10 animate-pulse-slow">
               <Play className="w-10 h-10 text-accent ml-1" />
             </div>
             <h2 className="text-xl font-display font-bold text-white mb-3">Tap to Play</h2>
-            <p className="text-sm text-text-muted mb-8 leading-relaxed">
-              Your browser requires you to tap the screen before music can play in the background.
+            <p className="text-sm text-text-muted mb-4 leading-relaxed">
+              Your browser blocked background music playback.
+            </p>
+            <p className="text-xs text-red-400 font-mono mb-8 p-2 bg-red-400/10 rounded break-all max-w-full">
+              {audioError}
             </p>
             <button 
               className="btn-primary w-full py-4 text-base font-bold shadow-lg shadow-accent/20 transition-transform active:scale-95"
               onClick={() => {
                 audio.play().then(() => {
-                  usePlayerStore.getState().setAudioBlocked(false);
-                }).catch(() => {});
+                  usePlayerStore.getState().setAudioError(null);
+                }).catch((e) => {
+                  usePlayerStore.getState().setAudioError(e.name + ': ' + e.message);
+                });
               }}
             >
               Start Listening

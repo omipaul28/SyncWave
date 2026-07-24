@@ -242,9 +242,9 @@ export default function RoomPage() {
     }
     if (room.isPlaying) {
       audio.play().then(() => {
-        if (usePlayerStore.getState().isAudioBlocked) usePlayerStore.getState().setAudioBlocked(false);
+        if (usePlayerStore.getState().audioError) usePlayerStore.getState().setAudioError(null);
       }).catch((e) => {
-        if (e.name === 'NotAllowedError') usePlayerStore.getState().setAudioBlocked(true);
+        usePlayerStore.getState().setAudioError(e.name + ': ' + e.message);
       });
     } else audio.pause();
   }, [room.currentSong?.id, room.isPlaying]);
@@ -277,9 +277,9 @@ export default function RoomPage() {
     // Synchronous unlock of the audio element on iOS during user gesture
     if (!room.isPlaying) {
       audio.play().then(() => {
-        if (usePlayerStore.getState().isAudioBlocked) usePlayerStore.getState().setAudioBlocked(false);
+        if (usePlayerStore.getState().audioError) usePlayerStore.getState().setAudioError(null);
       }).catch((e) => {
-        if (e.name === 'NotAllowedError') usePlayerStore.getState().setAudioBlocked(true);
+        usePlayerStore.getState().setAudioError(e.name + ': ' + e.message);
       });
     }
     room.isPlaying ? emitPause() : emitPlay();
@@ -306,9 +306,9 @@ export default function RoomPage() {
     // Synchronous unlock of the audio element on iOS during user gesture
     if (!room.isPlaying) {
       audio.play().then(() => {
-        if (usePlayerStore.getState().isAudioBlocked) usePlayerStore.getState().setAudioBlocked(false);
+        if (usePlayerStore.getState().audioError) usePlayerStore.getState().setAudioError(null);
       }).catch((e) => {
-        if (e.name === 'NotAllowedError') usePlayerStore.getState().setAudioBlocked(true);
+        usePlayerStore.getState().setAudioError(e.name + ': ' + e.message);
       });
     }
     emitSongChange(song);

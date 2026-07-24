@@ -10,9 +10,9 @@ const syncAudio = (song, play) => {
     }
     if (play) {
       audio.play().then(() => {
-        if (state.isAudioBlocked) state.setAudioBlocked(false);
+        if (state.audioError) state.setAudioError(null);
       }).catch((e) => {
-        if (e.name === 'NotAllowedError') state.setAudioBlocked(true);
+        state.setAudioError(e.name + ': ' + e.message);
       });
     } else {
       audio.pause();
@@ -43,10 +43,10 @@ const usePlayerStore = create((set, get) => ({
   isFullPlayer: false,
   isQueueOpen: false,
   isLyricsOpen: false,
-  isAudioBlocked: false,
+  audioError: null,
 
   // ── Actions ──────────────────────────────────────────────────────────────────
-  setAudioBlocked: (blocked) => set({ isAudioBlocked: blocked }),
+  setAudioError: (error) => set({ audioError: error }),
   setCurrentSong: (song) => {
     syncAudio(song, true);
     set({ currentSong: song, currentTime: 0, isPlaying: true });

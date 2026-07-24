@@ -54,9 +54,9 @@ const useRoom = (rawRoomId, audio) => {
         }
         if (delta.isPlaying === true) {
           audio?.play().then(() => {
-            if (usePlayerStore.getState().isAudioBlocked) usePlayerStore.getState().setAudioBlocked(false);
+            if (usePlayerStore.getState().audioError) usePlayerStore.getState().setAudioError(null);
           }).catch((e) => {
-            if (e.name === 'NotAllowedError') usePlayerStore.getState().setAudioBlocked(true);
+            usePlayerStore.getState().setAudioError(e.name + ': ' + e.message);
           });
         }
         if (delta.isPlaying === false) audio?.pause();
