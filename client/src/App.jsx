@@ -55,17 +55,8 @@ export default function App() {
   useEffect(() => {
     // Unlock HTMLAudioElement for iOS Safari on first interaction
     const unlockAudio = () => {
-      // Play silent audio to unlock context on mobile
-      if (audio.paused) {
-        const onPlaying = () => {
-          audio.pause();
-          audio.removeEventListener('playing', onPlaying);
-        };
-        audio.addEventListener('playing', onPlaying);
-        audio.play().catch(() => {
-          audio.removeEventListener('playing', onPlaying);
-        });
-      }
+      // Empty play call rejects with NotSupportedError but sets the unlocked flag on iOS Safari
+      audio.play().catch(() => {});
       document.removeEventListener('click', unlockAudio);
       document.removeEventListener('touchstart', unlockAudio);
     };
