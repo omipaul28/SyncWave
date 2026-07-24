@@ -5,6 +5,7 @@ import { auth } from './lib/firebase';
 import { connectSocket, disconnectSocket } from './lib/socket';
 import { verifyUser } from './api/usersApi';
 import useAuthStore from './store/authStore';
+import { audio } from './hooks/useAudio';
 
 // Layouts
 import MainLayout from './components/layout/MainLayout';
@@ -52,6 +53,17 @@ export default function App() {
   const { setUser, setToken, setLoading, logout } = useAuthStore();
 
   useEffect(() => {
+    // Unlock HTMLAudioElement for iOS Safari on first interaction
+    const unlockAudio = () => {
+      if (audio.paused && !audio.src) {
+        audio.play().catch(() => {});
+      }
+      document.removeEventListener('click', unlockAudio);
+      document.removeEventListener('touchstart', unlockAudio);
+    };
+    document.addEventListener('click', unlockAudio);
+    document.addEventListener('touchstart', unlockAudio);
+
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
       if (firebaseUser) {
         try {
@@ -73,7 +85,11 @@ export default function App() {
       setLoading(false);
     });
 
-    return unsubscribe;
+    return () => {
+      unsubscribe();
+      document.removeEventListener('click', unlockAudio);
+      document.removeEventListener('touchstart', unlockAudio);
+    };
   }, []);
 
   return (
