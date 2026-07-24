@@ -1,0 +1,133 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;600;700;800&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  * {
+    @apply box-border;
+  }
+
+  html, body, #root {
+    @apply h-full;
+  }
+
+  body {
+    @apply bg-surface-base text-text-primary font-sans antialiased;
+    overflow: hidden;
+  }
+
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+
+  ::-webkit-scrollbar-track {
+    @apply bg-surface-raised;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    @apply bg-surface-border rounded-full;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    @apply bg-text-muted;
+  }
+}
+
+@layer components {
+  .btn-primary {
+    @apply inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-accent text-white font-semibold text-sm
+           hover:bg-accent-dark transition-all duration-200 hover:scale-105 active:scale-95;
+  }
+
+  .btn-secondary {
+    @apply inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-surface-overlay border border-surface-border
+           text-text-primary font-semibold text-sm hover:bg-surface-hover transition-all duration-200 active:scale-95;
+  }
+
+  .btn-ghost {
+    @apply inline-flex items-center gap-2 px-3 py-2 rounded-lg text-text-secondary font-medium text-sm
+           hover:text-text-primary hover:bg-surface-hover transition-all duration-150;
+  }
+
+  .btn-icon {
+    @apply inline-flex items-center justify-center w-9 h-9 rounded-full text-text-secondary
+           hover:text-text-primary hover:bg-surface-hover transition-all duration-150 active:scale-90;
+  }
+
+  .card {
+    @apply bg-surface-raised border border-surface-border rounded-xl shadow-card p-4
+           hover:bg-surface-hover transition-colors duration-200;
+  }
+
+  .input-field {
+    @apply w-full bg-surface-overlay border border-surface-border rounded-lg px-4 py-3
+           text-text-primary placeholder:text-text-muted focus:outline-none focus:border-accent
+           focus:ring-1 focus:ring-accent transition-all duration-200 text-sm;
+  }
+
+  .sidebar-item {
+    @apply flex items-center gap-3 px-4 py-3 rounded-lg text-text-secondary font-medium text-sm
+           hover:text-text-primary hover:bg-surface-hover transition-all duration-150 cursor-pointer;
+  }
+
+  .sidebar-item.active {
+    @apply text-text-primary bg-surface-hover;
+  }
+
+  .progress-bar {
+    @apply relative w-full h-1 bg-surface-border rounded-full cursor-pointer;
+  }
+
+  .progress-fill {
+    @apply absolute top-0 left-0 h-full bg-white rounded-full group-hover:bg-accent transition-colors;
+  }
+
+  .progress-thumb {
+    @apply absolute top-1/2 -translate-y-1/2 w-3 h-3 bg-white rounded-full shadow opacity-0
+           group-hover:opacity-100 transition-opacity duration-150 pointer-events-none;
+  }
+
+  .song-card {
+    @apply relative flex flex-col gap-3 p-3 rounded-xl bg-surface-raised border border-transparent
+           hover:border-surface-border hover:bg-surface-overlay transition-all duration-200 cursor-pointer;
+  }
+
+  .song-card-cover {
+    @apply relative w-full aspect-square rounded-lg overflow-hidden bg-surface-overlay;
+  }
+
+  .equalizer {
+    @apply flex items-end gap-0.5 h-4;
+  }
+
+  .equalizer-bar {
+    @apply w-0.5 bg-accent rounded-full animate-equalizer;
+  }
+
+  .glass {
+    @apply bg-surface-raised/80 backdrop-blur-md border border-surface-border/50;
+  }
+
+  .gradient-text {
+    @apply text-accent font-bold;
+  }
+
+  .room-badge {
+    @apply inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-accent/10 text-accent text-xs font-semibold
+           border border-accent/20;
+  }
+}
+
+@layer utilities {
+  .no-scrollbar::-webkit-scrollbar { display: none; }
+  .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+  .text-balance { text-wrap: balance; }
+
+  .clip-text {
+    @apply bg-clip-text text-transparent;
+  }
+}

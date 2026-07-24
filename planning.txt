@@ -1,0 +1,641 @@
+# SyncWave – Real-Time Collaborative Music Streaming Platform
+
+## Project Overview
+
+**SyncWave** is a modern web-based music streaming platform inspired by Spotify, with one unique feature: **real-time collaborative listening**. Unlike Spotify Jam, where one person primarily controls playback, SyncWave allows **every member in a listening room to control the music simultaneously**. Any participant can play, pause, skip, seek, shuffle, repeat, or manage the shared queue, and all connected users stay synchronized in real time.
+
+The application also includes playlist management, favorites, music search, synchronized lyrics, an admin panel for managing songs, and a scalable architecture using only free services.
+
+---
+
+# Objectives
+
+The goal of SyncWave is to provide users with:
+
+* High-quality online music streaming
+* Zero-download playback
+* Collaborative music listening
+* Playlist management
+* Fast music searching
+* Real-time synchronization
+* Responsive modern UI
+* Completely free infrastructure
+
+---
+
+# Technology Stack
+
+## Frontend
+
+* React (Vite)
+* Tailwind CSS
+* React Router
+* Zustand (State Management)
+* TanStack Query
+* Axios
+* Socket.IO Client
+* HTML5 Audio API
+* WaveSurfer.js (optional waveform visualization)
+
+---
+
+## Backend
+
+* Node.js
+* Express.js
+* Socket.IO
+* Firebase Firestore
+* Firebase Authentication
+* Cloudinary
+* JWT Authentication
+
+---
+
+## Free Infrastructure
+
+| Service       | Purpose               |
+| ------------- | --------------------- |
+| Firestore     | Database              |
+| Cloudinary    | Audio & Image Storage |
+| Firebase Auth | Authentication        |
+| Render        | Backend Hosting       |
+| Vercel        | Frontend Hosting      |
+
+---
+
+# User Roles
+
+## User
+
+A normal registered user who can
+
+* Register/Login
+* Stream music
+* Create playlists
+* Like songs
+* Join listening rooms
+* Create collaborative rooms
+* Search songs
+* View lyrics
+
+---
+
+## Admin
+
+An administrator who can
+
+* Upload songs
+* Edit song information
+* Delete songs
+* Manage artists
+* Manage albums
+* Manage users
+* View analytics
+
+---
+
+# Core Features
+
+## 1. Music Streaming
+
+Users can instantly stream songs without downloading the full file.
+
+Features:
+
+* Play
+* Pause
+* Resume
+* Next
+* Previous
+* Seek
+* Volume control
+* Playback speed
+* Repeat One
+* Repeat All
+* Shuffle
+* Queue
+
+Streaming is performed using Cloudinary-hosted MP3 files and the browser's HTML5 Audio API, which supports byte-range requests for smooth playback.
+
+---
+
+## 2. Search System
+
+Users can search by
+
+* Song title
+* Artist
+* Album
+* Genre
+
+The backend stores normalized search fields and keywords to enable fast prefix searching.
+
+---
+
+## 3. Playlist System
+
+Users can create unlimited playlists.
+
+Features
+
+* Create playlist
+* Delete playlist
+* Rename playlist
+* Add songs
+* Remove songs
+* Reorder songs
+* Public playlist
+* Private playlist
+
+---
+
+## 4. Favorites
+
+Each user has
+
+* Liked Songs
+* Recently Played
+* Most Played
+
+---
+
+# Main Feature
+
+# Real-Time Collaborative Listening Room
+
+This is the primary feature that differentiates the project.
+
+Users can create a listening room and invite others using a Room ID or shareable link.
+
+Unlike Spotify Jam, **every participant has equal control over playback**.
+
+Anyone in the room can:
+
+* Play music
+* Pause music
+* Resume music
+* Skip songs
+* Go to previous songs
+* Seek to any position
+* Shuffle playlist
+* Change repeat mode
+* Add songs
+* Remove songs
+* Reorder queue
+
+There is no playback "host." The server maintains the room state and applies actions in the order they are received. A room owner exists only for room administration (for example, removing disruptive users or deleting the room).
+
+---
+
+# Room Synchronization
+
+The server stores the room state:
+
+```text
+Room
+ ├── Current Song
+ ├── Current Time
+ ├── Playing / Paused
+ ├── Queue
+ ├── Shuffle
+ ├── Repeat
+ ├── Members
+ ├── Updated By
+ └── Last Updated
+```
+
+Every control action follows this flow:
+
+```text
+User Action
+      │
+      ▼
+Socket.IO Event
+      │
+      ▼
+Express Server
+      │
+Update Room State
+      │
+      ▼
+Broadcast to Everyone
+      │
+      ▼
+All Clients Update Together
+```
+
+Example:
+
+```text
+User B presses Next
+
+↓
+
+Server changes current song
+
+↓
+
+Broadcast
+
+↓
+
+Every user immediately switches
+```
+
+If User C seeks to 2:10:
+
+```text
+Seek to 130 sec
+
+↓
+
+Server
+
+↓
+
+Broadcast
+
+↓
+
+Everyone seeks to 130 sec
+```
+
+To keep playback synchronized, clients periodically compare their playback position with the server. If the drift exceeds a small threshold (e.g., 300–500 ms), the client automatically seeks or briefly adjusts playback speed to resynchronize.
+
+---
+
+# Queue Collaboration
+
+The queue is shared.
+
+Example
+
+```text
+Current Queue
+
+1
+2
+3
+4
+```
+
+User A adds a song
+
+```text
+1
+2
+3
+4
+New Song
+```
+
+Everyone instantly receives the updated queue.
+
+---
+
+# Lyrics Feature
+
+Each song can display lyrics.
+
+Recommended approach:
+
+1. When a song is played, request synchronized lyrics from a free lyrics provider (such as LRCLIB if available for that song).
+2. Cache the lyrics in Firestore.
+3. Future requests use the cached version.
+4. If no lyrics are available, display "Lyrics unavailable."
+
+If synchronized timestamps are available, highlight the current line as the song progresses.
+
+---
+
+# Bufferless Streaming
+
+The system uses Cloudinary URLs for audio.
+
+Playback flow:
+
+```text
+User clicks Play
+
+↓
+
+Audio URL
+
+↓
+
+Cloudinary CDN
+
+↓
+
+Browser requests small audio chunks
+
+↓
+
+Music starts playing immediately
+
+↓
+
+More chunks are loaded while playing
+```
+
+Advantages:
+
+* No full download before playback
+* Faster startup
+* Lower memory usage
+* Efficient bandwidth usage
+* CDN delivery worldwide
+
+To make transitions smoother, the next song can begin preloading shortly before the current one finishes.
+
+---
+
+# Authentication
+
+Users can
+
+* Register
+* Login
+* Logout
+* Reset password
+* Update profile
+
+Authentication uses Firebase Authentication with JWT-secured backend APIs.
+
+---
+
+# Music Player
+
+Features
+
+* Mini Player
+* Full Screen Player
+* Queue
+* Volume
+* Progress Bar
+* Seek
+* Shuffle
+* Repeat
+* Keyboard shortcuts
+* Playback speed
+
+---
+
+# Admin Panel
+
+The admin dashboard allows complete content management.
+
+Features
+
+* Upload MP3 files
+* Upload cover images
+* Edit song metadata
+* Delete songs
+* Create artists
+* Create albums
+* View upload history
+* View user statistics
+* View play counts
+
+Recommended upload workflow:
+
+```text
+Admin uploads MP3 + Cover
+
+↓
+
+Backend validates files
+
+↓
+
+Upload to Cloudinary
+
+↓
+
+Receive URLs
+
+↓
+
+Save metadata in Firestore
+
+↓
+
+Song becomes available
+```
+
+*(If you plan to support importing from external sources, ensure the content is licensed or that you have permission to distribute it.)*
+
+---
+
+# Database Design
+
+## Users
+
+```text
+users
+ ├── uid
+ ├── username
+ ├── email
+ ├── avatar
+ ├── likedSongs
+ ├── recentlyPlayed
+ ├── playlists
+ └── createdAt
+```
+
+---
+
+## Songs
+
+```text
+songs
+ ├── id
+ ├── title
+ ├── artist
+ ├── album
+ ├── duration
+ ├── genre
+ ├── coverUrl
+ ├── audioUrl
+ ├── lyrics
+ ├── playCount
+ ├── uploadedAt
+ └── keywords
+```
+
+---
+
+## Playlists
+
+```text
+playlists
+ ├── id
+ ├── ownerId
+ ├── title
+ ├── cover
+ ├── songs[]
+ ├── visibility
+ └── createdAt
+```
+
+---
+
+## Jam Rooms
+
+```text
+rooms
+ ├── roomId
+ ├── ownerId
+ ├── members[]
+ ├── currentSong
+ ├── currentTime
+ ├── queue[]
+ ├── shuffle
+ ├── repeat
+ ├── isPlaying
+ ├── updatedBy
+ └── updatedAt
+```
+
+---
+
+# Socket.IO Events
+
+```text
+join-room
+
+leave-room
+
+play
+
+pause
+
+resume
+
+seek
+
+next
+
+previous
+
+song-change
+
+queue-add
+
+queue-remove
+
+queue-reorder
+
+shuffle
+
+repeat
+
+member-joined
+
+member-left
+
+sync-state
+
+heartbeat
+```
+
+---
+
+# Security
+
+* JWT authentication
+* Firebase Auth
+* Protected APIs
+* Role-based access (Admin/User)
+* Firestore security rules
+* Input validation
+* File type validation
+* Upload size limits
+* Socket authentication
+
+---
+
+# Additional Features
+
+* Recently Played
+* Most Played Songs
+* Trending Songs
+* Artist Pages
+* Album Pages
+* Dark Mode
+* Queue History
+* Audio Visualizer
+* Share Playlist
+* Share Song
+* Invite Friends to Room
+* User Presence (online/offline)
+* Listening Activity
+* Responsive Design
+* Progressive Web App (optional)
+
+---
+
+# Non-Functional Requirements
+
+* Fast search response
+* Low-latency synchronized playback
+* Responsive UI for desktop and mobile
+* Scalable media delivery
+* Secure authentication and authorization
+* Efficient Firestore reads and writes
+* Reliable real-time communication
+* Maintainable modular codebase
+
+---
+
+# Project Workflow
+
+```text
+User Registers
+        │
+        ▼
+Login
+        │
+        ▼
+Browse/Search Songs
+        │
+        ▼
+Play Music
+        │
+        ▼
+Cloudinary Streams Audio
+        │
+        ▼
+User Creates Playlist
+        │
+        ▼
+Invite Friends to Room
+        │
+        ▼
+Everyone Joins Room
+        │
+        ▼
+Any Member Controls Playback
+        │
+        ▼
+Server Updates Shared Room State
+        │
+        ▼
+Socket.IO Broadcasts Changes
+        │
+        ▼
+All Users Stay Perfectly Synchronized
+```
+
+## Future Enhancements
+
+* Voice chat inside listening rooms
+* Collaborative playlist editing before playback
+* AI-powered song recommendations
+* Mood-based playlists
+* Audio quality selection (128/192/320 kbps)
+* Crossfade and gapless playback
+* Offline downloads for licensed content
+* Friend system with follow requests
+* Listening statistics and yearly recap
+* Chromecast and AirPlay support
