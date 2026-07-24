@@ -14,7 +14,7 @@ const syncAudio = (song, play) => {
     }
   } else if (!song && !play) {
     audio.pause();
-    audio.src = '';
+    // Do NOT clear audio.src here. Doing so re-locks the audio context on iOS Safari.
   }
 };
 const usePlayerStore = create((set, get) => ({

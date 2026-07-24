@@ -248,7 +248,6 @@ export default function RoomPage() {
   useEffect(() => {
     return () => {
       audio.pause();
-      audio.src = '';
     };
   }, []);
 
@@ -273,7 +272,6 @@ export default function RoomPage() {
 
   const handleLeave = () => {
     audio.pause();
-    audio.src = '';
     navigate('/');
   };
 

@@ -1,4 +1,5 @@
 export const audio = new Audio();
+audio.src = 'data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAIhYAQACABAAAABkYXRhAgAAAAEA';
 audio.preload = 'metadata';
 
 // Attach to DOM for better mobile browser compatibility

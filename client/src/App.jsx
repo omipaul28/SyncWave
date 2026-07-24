@@ -55,12 +55,10 @@ export default function App() {
   useEffect(() => {
     // Unlock HTMLAudioElement for iOS Safari on first interaction
     const unlockAudio = () => {
-      if (audio.paused && !audio.src) {
-        // Play a tiny silent base64 WAV to unlock the audio context in iOS Safari
-        audio.src = 'data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAIhYAQACABAAAABkYXRhAgAAAAEA';
+      // Play silent audio to unlock context on mobile
+      if (audio.paused) {
         audio.play().then(() => {
           audio.pause();
-          audio.src = '';
         }).catch(() => {});
       }
       document.removeEventListener('click', unlockAudio);
